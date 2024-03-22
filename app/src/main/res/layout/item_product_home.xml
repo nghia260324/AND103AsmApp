@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="12dp">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center|top"
+        android:padding="12dp"
+        android:background="@drawable/cus_bgr_white_shadow">
+        <ImageView
+            android:id="@+id/img_thumbnail"
+            android:layout_width="120dp"
+            android:layout_height="100dp"
+            android:src="@drawable/apples_red"
+            android:scaleType="centerCrop"/>
+        <TextView
+            android:id="@+id/tv_price"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="100,000k"
+            android:textSize="14sp"
+            android:textColor="@color/green_200"
+            android:fontFamily="@font/mulishmedium"/>
+        <TextView
+            android:id="@+id/tv_name"
+            android:gravity="center|top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Apple"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:fontFamily="@font/mulishbold"
+            android:lines="2"
+            android:ellipsize="end"/>
+        <TextView
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add to cart"
+            android:textSize="14sp"
+            android:textColor="@color/green_200"
+            android:fontFamily="@font/mulishmedium"/>
+
+    </LinearLayout>
+</RelativeLayout>

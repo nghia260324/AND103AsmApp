@@ -1,7 +1,9 @@
 package com.ph41626.and103_assignment.Services;
 
+import com.ph41626.and103_assignment.Model.Cart;
 import com.ph41626.and103_assignment.Model.Category;
 import com.ph41626.and103_assignment.Model.Distributor;
+import com.ph41626.and103_assignment.Model.Order;
 import com.ph41626.and103_assignment.Model.Product;
 import com.ph41626.and103_assignment.Model.Response;
 import com.ph41626.and103_assignment.Model.User;
@@ -23,7 +25,7 @@ import retrofit2.http.Query;
 
 public interface ApiServices {
     //public static final String BASE_URL = "http://10.0.2.2:3000/";
-    public static final String BASE_URL = "http://192.168.0.5:3000/";
+    public static final String BASE_URL = "http://192.168.0.3:3000/";
     //public static final String BASE_URL = "http://192.168.171.223:3000/";
     @GET("/check-email")
     Call<Response<Boolean>> checkEmailExists(@Query("email") String email);
@@ -58,7 +60,7 @@ public interface ApiServices {
     @GET("/check-distributor/{id}")
     Call<Response<Distributor>> checkDistributor(@Path("id")String id);
 
-    //////////
+    /////
     @GET("/get-list-products")
     Call<Response<ArrayList<Product>>> getListProducts();
     @Multipart
@@ -87,4 +89,23 @@ public interface ApiServices {
     Call<Response<Product>> updateProductWithoutThumbnail(@Path("id_product")String id,@Body Product product);
     @DELETE("/delete-product/{id}")
     Call<Response<Product>> deleteProduct(@Path("id")String id);
+
+    @GET("/search-product")
+    Call<Response<ArrayList<Product>>> searchProduct(@Query("key")String key);
+
+
+    /////
+    @POST("/add-cart")
+    Call<Response<Cart>> addCart (@Body Cart cart);
+    @GET("/get-list-cart-by-id/{id_user}")
+    Call<Response<ArrayList<Cart>>> getListCartsById(@Path("id_user") String id_user);
+    @PUT("/update-cart/{id_cart}")
+    Call<Response<Cart>> updateCartItem (@Path("id_cart") String id_cart,@Body Cart cart);
+    @PUT("/update-cart")
+    Call<Response<ArrayList<Cart>>> updateCart (@Body ArrayList<Cart> carts);
+//    @POST("/add-bill")
+//    Call<Response<>>
+//
+    @POST("/add-order")
+    Call<Response<Order>> order(@Body Order order);
 }

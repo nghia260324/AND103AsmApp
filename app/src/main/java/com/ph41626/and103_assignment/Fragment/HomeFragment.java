@@ -11,7 +11,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
+import com.ph41626.and103_assignment.Activity.MainActivity;
 import com.ph41626.and103_assignment.Adapter.RecyclerViewProductHomeAdapter;
 import com.ph41626.and103_assignment.Model.Product;
 import com.ph41626.and103_assignment.Model.ViewModel;
@@ -68,8 +70,10 @@ public class HomeFragment extends Fragment {
 
     private RecyclerView rcv_productHome;
     private ViewModel viewModel;
+    private EditText edt_searchHome;
     private RecyclerViewProductHomeAdapter productHomeAdapter;
     private ArrayList<Product> listProducts = new ArrayList<>();
+    private MainActivity mainActivity;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -78,7 +82,19 @@ public class HomeFragment extends Fragment {
         initUI(view);
         FillRecyclerViewProductsHome();
         UpdateRecyclerViewWhenDataChanges();
+        GoToFragmentSearch();
         return view;
+    }
+
+    private void GoToFragmentSearch() {
+        edt_searchHome.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    mainActivity.GoToFragmentSearch();
+                }
+            }
+        });
     }
 
     private void UpdateRecyclerViewWhenDataChanges() {
@@ -95,8 +111,10 @@ public class HomeFragment extends Fragment {
         rcv_productHome.setNestedScrollingEnabled(false);
     }
     private void initUI(View view) {
+        mainActivity = (MainActivity) getActivity();
         viewModel = new ViewModelProvider(requireActivity()).get(ViewModel.class);
         rcv_productHome = view.findViewById(R.id.rcv_productHome);
-        productHomeAdapter = new RecyclerViewProductHomeAdapter(getContext(), listProducts);
+        productHomeAdapter = new RecyclerViewProductHomeAdapter(getContext(), listProducts,mainActivity);
+        edt_searchHome = view.findViewById(R.id.edt_searchHome);
     }
 }

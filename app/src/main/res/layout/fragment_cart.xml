@@ -3,12 +3,79 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragment.CartFragment">
+    tools:context=".Fragment.CartFragment"
+    android:paddingHorizontal="24dp">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
-
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_marginTop="24dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingBottom="80dp">
+            <TextView
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cart"
+                android:textSize="18sp"
+                android:textColor="@color/black_220"
+                android:fontFamily="@font/museomodernobold"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_marginTop="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:id="@+id/rcv_cart"/>
+        </LinearLayout>
+        <LinearLayout
+            android:gravity="center|bottom"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentBottom="true"
+            android:layout_width="200dp"
+            android:layout_height="80dp"
+            android:background="@drawable/cus_bgr_white_circle_shadow"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_marginTop="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_gravity="left"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    android:gravity="center_vertical"
+                    android:text="Amount: "
+                    android:layout_marginLeft="12dp"
+                    android:textSize="16sp"
+                    android:textColor="@color/black_220"
+                    android:fontFamily="@font/museomodernomedium"/>
+                <TextView
+                    android:id="@+id/tv_amount"
+                    android:layout_gravity="left"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="24dp"
+                    android:gravity="center_vertical|right"
+                    android:text="100,000đ"
+                    android:layout_marginRight="12dp"
+                    android:textSize="16sp"
+                    android:textColor="@color/green_200"
+                    android:fontFamily="@font/museomodernoitalic"/>
+            </LinearLayout>
+            <Button
+                android:layout_marginTop="12dp"
+                android:background="@drawable/cus_bgr_green_circle_bottom"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:text="Order"
+                android:fontFamily="@font/museomodernomedium"
+                android:textColor="@color/white"
+                android:id="@+id/btn_order"/>
+        </LinearLayout>
+    </RelativeLayout>
 </FrameLayout>

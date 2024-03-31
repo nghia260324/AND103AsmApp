@@ -9,4 +9,7 @@
     <style name="rounded_corner">
         <item name="cornerSize">50%</item>
     </style>
+    <style name="rounded_corner_12">
+        <item name="cornerSize">12px</item>
+    </style>
 </resources>

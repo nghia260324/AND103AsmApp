@@ -37,6 +37,7 @@
                 android:text="What are you looking for ?"
                 android:fontFamily="@font/mulishmedium"/>
             <EditText
+                android:id="@+id/edt_searchHome"
                 android:textColorHint="@color/gray_889"
                 android:layout_marginTop="24dp"
                 android:layout_width="match_parent"

@@ -29,12 +29,27 @@ public class RecyclerViewSettingsAdapter extends RecyclerView.Adapter<RecyclerVi
     @NonNull
     @Override
     public RecyclerViewSettingsAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_setting,null,false);
+//        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_setting,null,false);
+//        return new ViewHolder(view);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_setting, parent, false);
+        RecyclerView.LayoutParams layoutParams = new RecyclerView.LayoutParams(
+                RecyclerView.LayoutParams.MATCH_PARENT,
+                RecyclerView.LayoutParams.WRAP_CONTENT
+        );
+        view.setLayoutParams(layoutParams);
+
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerViewSettingsAdapter.ViewHolder holder, int position) {
+        if (!mainActivity.isAdmin() && holder.getAdapterPosition() == 1) {
+            RecyclerView.LayoutParams param = (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
+            param.height = 0;
+            holder.itemView.setLayoutParams(param);
+            holder.itemView.setVisibility(View.GONE);
+
+        }
         Setting setting = listSettings.get(position);
         holder.img_icon.setImageResource(setting.getIcon());
         holder.tv_name.setText(setting.getName());
@@ -50,6 +65,7 @@ public class RecyclerViewSettingsAdapter extends RecyclerView.Adapter<RecyclerVi
                     case 2:
                         break;
                     case 3:
+                        mainActivity.LogOut();
                         break;
                     default: return;
                 }

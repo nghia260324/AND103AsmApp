@@ -1,6 +1,8 @@
 package com.ph41626.and103_assignment.Model;
 
-public class User {
+import java.io.Serializable;
+
+public class User implements Serializable {
     private String _id,password,email,avatar,name;
     private String createdAt,updatedAt;
 
@@ -71,5 +73,18 @@ public class User {
 
     public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "_id='" + _id + '\'' +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", avatar='" + avatar + '\'' +
+                ", name='" + name + '\'' +
+                ", createdAt='" + createdAt + '\'' +
+                ", updatedAt='" + updatedAt + '\'' +
+                '}';
     }
 }

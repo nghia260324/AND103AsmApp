@@ -18,41 +18,35 @@ import com.ph41626.and103_assignment.Activity.MainActivity;
 import com.ph41626.and103_assignment.Model.Product;
 import com.ph41626.and103_assignment.R;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-public class RecyclerViewProductHomeAdapter extends RecyclerView.Adapter<RecyclerViewProductHomeAdapter.ViewHolder> {
-
+public class RecyclerViewSearchProductAdapter extends RecyclerView.Adapter<RecyclerViewSearchProductAdapter.ViewHolder> {
     private Context context;
     private ArrayList<Product> listProducts;
     private MainActivity mainActivity;
-    public void UpdateData(ArrayList<Product> products) {
-        listProducts = products;
-        notifyDataSetChanged();
-    }
-    public RecyclerViewProductHomeAdapter(Context context, ArrayList<Product> listProducts,MainActivity mainActivity) {
+    public RecyclerViewSearchProductAdapter(Context context, ArrayList<Product> listProducts,MainActivity mainActivity) {
         this.context = context;
         this.listProducts = listProducts;
         this.mainActivity = mainActivity;
     }
 
+    public void UpdateData(ArrayList<Product> products) {
+        listProducts = products;
+        notifyDataSetChanged();
+    }
     @NonNull
     @Override
-    public RecyclerViewProductHomeAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecyclerViewSearchProductAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_product_home,null,false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerViewProductHomeAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerViewSearchProductAdapter.ViewHolder holder, int position) {
         Product product = listProducts.get(position);
         holder.tv_name.setText(product.getName());
         holder.tv_price.setText(formatPrice(product.getPrice(),"₫"));
-        Glide.with(context).
-                load(convertLocalhostToIpAddress(product.getThumbnail())).
-                error(R.drawable.img_home_1).
-                placeholder(R.drawable.img_home_1).
-                into(holder.img_thumbnail);
+        Glide.with(context).load(convertLocalhostToIpAddress(product.getThumbnail())).error(R.drawable.img_home_1).placeholder(R.drawable.img_home_1).into(holder.img_thumbnail);
         holder.btn_addToCart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -62,14 +56,14 @@ public class RecyclerViewProductHomeAdapter extends RecyclerView.Adapter<Recycle
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainActivity.OpenProductDetail(product);
+                mainActivity.OpenDialogProductDetail(product);
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return listProducts != null? listProducts.size() : 0;
+        return listProducts != null ? listProducts.size() : 0;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

@@ -90,7 +90,6 @@ public class ProfileFragment extends Fragment {
         FillRecyclerViewSetting();
 
         UpdateUserWhenDataChanges();
-
         return view;
     }
     private void UpdateUserWhenDataChanges() {

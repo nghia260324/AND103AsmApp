@@ -3,6 +3,7 @@ package com.ph41626.and103_assignment.Model;
 import java.io.Serializable;
 
 public class AddressInfo implements Serializable {
+    private String id_user;
     private String phone;
     private String address;
     private Province province;
@@ -12,12 +13,21 @@ public class AddressInfo implements Serializable {
     public AddressInfo() {
     }
 
-    public AddressInfo(String phone, String address, Province province, District district, Ward ward) {
+    public AddressInfo(String id_user, String phone, String address, Province province, District district, Ward ward) {
+        this.id_user = id_user;
         this.phone = phone;
         this.address = address;
         this.province = province;
         this.district = district;
         this.ward = ward;
+    }
+
+    public String getId_user() {
+        return id_user;
+    }
+
+    public void setId_user(String id_user) {
+        this.id_user = id_user;
     }
 
     public String getPhone() {

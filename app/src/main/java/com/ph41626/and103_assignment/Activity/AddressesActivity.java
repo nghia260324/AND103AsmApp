@@ -59,20 +59,6 @@ public class AddressesActivity extends AppCompatActivity {
     private District getDistrict = null;
     private Ward getWard = null;
     private AddressInfo addressInfo = null;
-    @Override
-    protected void onResume() {
-        super.onResume();
-        addressInfo = (AddressInfo) ReadObjectToFile(AddressesActivity.this,filePathAddressInfo);
-        if (addressInfo != null) {
-            getProvince = addressInfo.getProvince();
-            getDistrict = addressInfo.getDistrict();
-            getWard = addressInfo.getWard();
-            myPhone = addressInfo.getPhone();
-            myAddress = addressInfo.getAddress();
-        } else {
-            addressInfo = new AddressInfo();
-        }
-    }
 
     @Override
     public void onBackPressed() {
@@ -121,9 +107,14 @@ public class AddressesActivity extends AppCompatActivity {
         btn_update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                addressInfo = new AddressInfo();
+                addressInfo.setId_user(user.get_id());
                 addressInfo.setAddress(myAddress);
                 addressInfo.setPhone(myPhone);
-                WriteObjectToFile(AddressesActivity.this,filePathAddressInfo,addressInfo);
+                addressInfo.setProvince(getProvince);
+                addressInfo.setDistrict(getDistrict);
+                addressInfo.setWard(getWard);
+                WriteObjectToFile(AddressesActivity.this,user.get_id() + filePathAddressInfo,addressInfo);
                 Toast.makeText(AddressesActivity.this, "Update Successfully!", Toast.LENGTH_SHORT).show();
             }
         });
@@ -131,6 +122,17 @@ public class AddressesActivity extends AppCompatActivity {
     private void GetDataFromOrderActivity() {
         Intent intent = getIntent();
         user = (User) intent.getSerializableExtra("user");
+
+        addressInfo = (AddressInfo) ReadObjectToFile(AddressesActivity.this,user.get_id() + filePathAddressInfo);
+        if (addressInfo != null && addressInfo.getId_user().equals(user.get_id())) {
+            getProvince = addressInfo.getProvince();
+            getDistrict = addressInfo.getDistrict();
+            getWard = addressInfo.getWard();
+            myPhone = addressInfo.getPhone();
+            myAddress = addressInfo.getAddress();
+        } else {
+            addressInfo = null;
+        }
     }
     private void GetMyAddressAndPhone() {
         edt_myAddress.addTextChangedListener(new TextWatcher() {

@@ -86,13 +86,14 @@ public class OrderActivity extends AppCompatActivity {
         setContentView(R.layout.activity_order);
 
         initUI();
-        addressInfo = (AddressInfo) ReadObjectToFile(this,filePathAddressInfo);
         GetDataFromCart();
         SelectedAddress();
-        if (addressInfo != null) {
+        addressInfo = (AddressInfo) ReadObjectToFile(this,user.get_id() + filePathAddressInfo);
+        if (addressInfo != null && addressInfo.getId_user().equals(user.get_id())) {
             FillInfo();
+        } else {
+            addressInfo = new AddressInfo();
         }
-
         btn_order.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -115,7 +116,6 @@ public class OrderActivity extends AppCompatActivity {
                         addressInfo.getDistrict().getDistrictID(),
                         ghnItems);
                 ghnRequest.callAPI().GHNOrder(ghnOrderRequest).enqueue(addOrderGHN);
-                
             }
         });
     }
@@ -123,9 +123,11 @@ public class OrderActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_ACTIVITY_BACK) {
-            addressInfo = (AddressInfo) ReadObjectToFile(this,filePathAddressInfo);
-            if (addressInfo != null) {
+            addressInfo = (AddressInfo) ReadObjectToFile(this,user.get_id() + filePathAddressInfo);
+            if (addressInfo != null && addressInfo.getId_user().equals(user.get_id())) {
                 FillInfo();
+            } else {
+                addressInfo = new AddressInfo();
             }
         }
     }
@@ -142,11 +144,9 @@ public class OrderActivity extends AppCompatActivity {
     }
     private void FillInfo() {
         String addressLine = user.getName() + " | " + addressInfo.getPhone() + "\n" + addressInfo.getAddress() + "\n";
-        if (addressInfo.getProvince() != null) {
-            addressLine += addressInfo.getProvince().getProvinceName() + ", ";
-            addressLine += addressInfo.getDistrict().getDistrictName() + ", ";
-            addressLine += addressInfo.getWard().getWardName();
-        }
+        addressLine += addressInfo.getProvince().getProvinceName() + ", ";
+        addressLine += addressInfo.getDistrict().getDistrictName() + ", ";
+        addressLine += addressInfo.getWard().getWardName();
         tv_address.setText(addressLine);
     }
 

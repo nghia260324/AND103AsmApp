@@ -86,9 +86,9 @@ public class OrderActivity extends AppCompatActivity {
         setContentView(R.layout.activity_order);
 
         initUI();
+        addressInfo = (AddressInfo) ReadObjectToFile(this,filePathAddressInfo);
         GetDataFromCart();
         SelectedAddress();
-        addressInfo = (AddressInfo) ReadObjectToFile(this,filePathAddressInfo);
         if (addressInfo != null) {
             FillInfo();
         }
@@ -115,18 +115,7 @@ public class OrderActivity extends AppCompatActivity {
                         addressInfo.getDistrict().getDistrictID(),
                         ghnItems);
                 ghnRequest.callAPI().GHNOrder(ghnOrderRequest).enqueue(addOrderGHN);
-
-
-//                ArrayList<GHNItem> ghnItems = new ArrayList<>();
-//                for (Product product:listProducts) {
-//                    GHNItem ghnItem = new GHNItem();
-//                    ghnItem.setName(product.getName());
-//                    ghnItem.setPrice(product.getPrice());
-//                    ghnItem.setCode(product.getId());
-//                    ghnItem.setQuantity(product.getQuantity());
-//                    ghnItem.setWeight(50);
-//                    ghnItems.add(ghnItem);
-//                }
+                
             }
         });
     }
@@ -182,10 +171,12 @@ public class OrderActivity extends AppCompatActivity {
             GHNItem ghnItem = new GHNItem();
             ghnItem.setName(product.getName());
             ghnItem.setCode(product.getId());
-            ghnItem.setPrice(product.getPrice());
+            ghnItem.setPrice(product.getPrice() * cart.getQuantity());
             ghnItem.setQuantity(cart.getQuantity());
             ghnItem.setWeight(50);
+
             ghnItems.add(ghnItem);
+
             setTotalPayment(getTotalPayment() + (cart.getQuantity() * product.getPrice()));
             FillProduct(product,cart);
         }

@@ -14,9 +14,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class GHNRequest {
-    public final static String SHOPID = "Your ShopID";
+    public final static String SHOPID = "191515";
 
-    public final static String TokenGHN = "Your TokenGHN";
+    public final static String TokenGHN = "ef55b0b5-eb41-11ee-a6e6-e60958111f48";
     private GHNServices ghnServicesInterface;
 
     public GHNRequest() {

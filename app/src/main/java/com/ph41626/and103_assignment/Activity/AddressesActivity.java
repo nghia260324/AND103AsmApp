@@ -8,6 +8,7 @@ import static com.ph41626.and103_assignment.Services.Services.findObjectById;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +49,7 @@ public class AddressesActivity extends AppCompatActivity {
     private EditText edt_myAddress,edt_myPhone;
     private TextView tv_address;
     private Button btn_update;
+    private ImageButton btn_back;
     private Spinner spinner_province,spinner_district,spinner_ward;
     private SpinnerProvinceAdapter spinnerProvinceAdapter;
     private SpinnerDistrictAdapter spinnerDistrictAdapter;
@@ -59,12 +62,13 @@ public class AddressesActivity extends AppCompatActivity {
     private District getDistrict = null;
     private Ward getWard = null;
     private AddressInfo addressInfo = null;
-
+    private ProgressDialog progressDialog;
+    private boolean isChange = false;
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        setResult(RESULT_OK);
-        finish();
+    protected void onStop() {
+        super.onStop();
+        int RESULT = isChange ? RESULT_OK : RESULT_CANCELED;
+        setResult(RESULT);
     }
 
     @Override
@@ -73,6 +77,10 @@ public class AddressesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_addresses);
 
         initUI();
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Please wait for seconds!");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
         GetDataFromOrderActivity();
         GetMyAddressAndPhone();
         AdapterView.OnItemSelectedListener onItemSelectedListener = new AdapterView.OnItemSelectedListener() {
@@ -103,10 +111,18 @@ public class AddressesActivity extends AppCompatActivity {
         spinner_ward.setOnItemSelectedListener(onItemSelectedListener);
         spinner_province.setSelection(0);
         ghnRequest.callAPI().getListProvince().enqueue(getProvinces);
-
+        btn_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int RESULT = isChange ? RESULT_OK : RESULT_CANCELED;
+                setResult(RESULT);
+                finish();
+            }
+        });
         btn_update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                isChange = true;
                 addressInfo = new AddressInfo();
                 addressInfo.setId_user(user.get_id());
                 addressInfo.setAddress(myAddress);
@@ -124,7 +140,7 @@ public class AddressesActivity extends AppCompatActivity {
         user = (User) intent.getSerializableExtra("user");
 
         addressInfo = (AddressInfo) ReadObjectToFile(AddressesActivity.this,user.get_id() + filePathAddressInfo);
-        if (addressInfo != null && addressInfo.getId_user().equals(user.get_id())) {
+        if (addressInfo != null) {
             getProvince = addressInfo.getProvince();
             getDistrict = addressInfo.getDistrict();
             getWard = addressInfo.getWard();
@@ -212,7 +228,9 @@ public class AddressesActivity extends AppCompatActivity {
                     ArrayList<District> districts = new ArrayList<>(response.body().getData());
                     spinnerDistrictAdapter = new SpinnerDistrictAdapter(AddressesActivity.this,R.layout.item_view_spinner,districts);
                     spinner_district.setAdapter(spinnerDistrictAdapter);
-                    if (addressInfo != null) {
+                    if (addressInfo != null &&
+                            getProvince != null &&
+                            getProvince.getProvinceID() == addressInfo.getProvince().getProvinceID()) {
                         int index = districts.indexOf(findObjectById(districts,String.valueOf(addressInfo.getDistrict().getDistrictID())));
                         spinner_district.setSelection(index);
                     }
@@ -233,9 +251,15 @@ public class AddressesActivity extends AppCompatActivity {
                     ArrayList<Ward> wards = new ArrayList<>(response.body().getData());
                     spinnerWardAdapter = new SpinnerWardAdapter(AddressesActivity.this,R.layout.item_view_spinner,wards);
                     spinner_ward.setAdapter(spinnerWardAdapter);
-                    if (addressInfo != null) {
+                    if (addressInfo != null &&
+                            getDistrict != null &&
+                            getDistrict.getDistrictID() == addressInfo.getDistrict().getDistrictID()) {
                         int index = wards.indexOf(findObjectById(wards,String.valueOf(addressInfo.getWard().getWardCode())));
                         spinner_ward.setSelection(index);
+                    }
+                    if (progressDialog != null) {
+                        progressDialog.dismiss();
+                        progressDialog = null;
                     }
                 }
             }
@@ -255,6 +279,7 @@ public class AddressesActivity extends AppCompatActivity {
         edt_myAddress = findViewById(R.id.edt_myAddress);
         edt_myPhone = findViewById(R.id.edt_myPhone);
         btn_update = findViewById(R.id.btn_update);
+        btn_back = findViewById(R.id.btn_back);
 
         ghnRequest = new GHNRequest();
     }

@@ -199,7 +199,7 @@ public class SignUpActivity extends AppCompatActivity {
     private boolean ValidateSignUpForm(String name, String email, String password, String confirmPassword) {
         boolean isValid = true;
 
-        if (!ValidateName(name)) {
+        if (!ValidateName(name) && !name.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
             isValid = false;
             edt_name.setError("Name is required!");
         }
@@ -207,7 +207,7 @@ public class SignUpActivity extends AppCompatActivity {
             isValid = false;
             edt_email.setError("Not a valid Email address!");
         }
-        if (!ValidatePassword(password)) {
+        if (!ValidatePassword(password) && !password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
             isValid = false;
             edt_password.setError("Not a valid Password!");
         }
@@ -215,7 +215,6 @@ public class SignUpActivity extends AppCompatActivity {
             isValid = false;
             edt_confirmPassword.setError("Not a valid Confirm Password!");
         }
-
         return isValid;
     }
     private boolean ValidatePassword(String password) {

@@ -1,6 +1,7 @@
 package com.ph41626.and103_assignment.Activity;
 
 import static com.ph41626.and103_assignment.Services.Services.PICK_IMAGE_REQUEST;
+import static com.ph41626.and103_assignment.Services.Services.ValidateInputFields;
 import static com.ph41626.and103_assignment.Services.Services.convertLocalhostToIpAddress;
 import static com.ph41626.and103_assignment.Services.Services.findCategoryIndexById;
 import static com.ph41626.and103_assignment.Services.Services.findDistributorIndexById;
@@ -33,6 +34,7 @@ import com.ph41626.and103_assignment.Model.Response;
 import com.ph41626.and103_assignment.Model.ViewModel;
 import com.ph41626.and103_assignment.R;
 import com.ph41626.and103_assignment.Services.HttpRequest;
+import com.ph41626.and103_assignment.Services.TokenManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -148,6 +150,14 @@ public class UpdateProductActivity extends AppCompatActivity {
                 int status = rdo_available.isChecked() ? 0 : 1;
                 String description = edt_description.getText().toString().trim();
 
+                if (!ValidateInputFields(
+                        name,edt_name,
+                        quantity,edt_quantity,
+                        price,edt_price,
+                        description,edt_description)) {
+                    return;
+                }
+
                 product.setName(name);
                 product.setQuantity(Integer.parseInt(quantity));
                 product.setPrice(Integer.parseInt(price));
@@ -169,6 +179,7 @@ public class UpdateProductActivity extends AppCompatActivity {
                     RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
                     multipartBody = MultipartBody.Part.createFormData("thumbnail", file.getName(), requestFile);
                     httpRequest.callAPI().updateProduct(
+                            TokenManager.getInstance(UpdateProductActivity.this).getToken(),
                             product.getId(),
                             _name,
                             _quantity,
@@ -179,11 +190,15 @@ public class UpdateProductActivity extends AppCompatActivity {
                             _id_category,
                             _id_distributor).enqueue(updateProduct);
                 } else {
-                    httpRequest.callAPI().updateProductWithoutThumbnail(product.getId(), product).enqueue(updateProduct);
+                    httpRequest.callAPI().updateProductWithoutThumbnail(
+                            TokenManager.getInstance(UpdateProductActivity.this).getToken(),
+                            product.getId(),
+                            product).enqueue(updateProduct);
                 }
             }
         });
     }
+
     private void CloseForm() {
         btn_back.setOnClickListener(new View.OnClickListener() {
             @Override

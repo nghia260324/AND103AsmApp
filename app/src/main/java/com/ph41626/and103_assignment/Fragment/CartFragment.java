@@ -1,11 +1,20 @@
 package com.ph41626.and103_assignment.Fragment;
 
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
+import static com.ph41626.and103_assignment.Activity.MainActivity.REQUEST_CODE_ACTIVITY_BACK;
+import static com.ph41626.and103_assignment.Services.Services.PICK_IMAGE_REQUEST;
+import static com.ph41626.and103_assignment.Services.Services.ReadObjectToFile;
+import static com.ph41626.and103_assignment.Services.Services.filePathAddressInfo;
 import static com.ph41626.and103_assignment.Services.Services.findObjectById;
 import static com.ph41626.and103_assignment.Services.Services.formatPrice;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -13,15 +22,21 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.google.gson.Gson;
 import com.ph41626.and103_assignment.Activity.MainActivity;
 import com.ph41626.and103_assignment.Activity.OrderActivity;
+import com.ph41626.and103_assignment.Activity.UserInformationActivity;
 import com.ph41626.and103_assignment.Adapter.RecyclerViewProductCartAdapter;
+import com.ph41626.and103_assignment.Model.AddressInfo;
 import com.ph41626.and103_assignment.Model.Cart;
 import com.ph41626.and103_assignment.Model.Product;
 import com.ph41626.and103_assignment.Model.Response;
@@ -31,7 +46,10 @@ import com.ph41626.and103_assignment.R;
 import com.ph41626.and103_assignment.Services.HttpRequest;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 
@@ -81,7 +99,7 @@ public class CartFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
-    private Button btn_order;
+    private Button btn_order,btn_deleteCartItem;
     private TextView tv_amount;
     private MainActivity mainActivity;
     private RecyclerView rcv_cart;
@@ -90,6 +108,8 @@ public class CartFragment extends Fragment {
     private ViewModel viewModel;
     private static final long DEBOUNCE_INTERVAL = 600;
     private ArrayList<Cart> listCarts = new ArrayList<>();
+    private ArrayList<Cart> listCartDeletes = new ArrayList<>();
+
     private Handler handlerItem = new Handler();
     private Handler handlerCart = new Handler();
     private Runnable runnableItem,runnableCart;
@@ -103,7 +123,6 @@ public class CartFragment extends Fragment {
             @Override
             public void run() {
                 httpRequest.callAPI().updateCartItem(cart.get_id(),cart).enqueue(updateCartItem);
-                lastItemUpdate = currentItemUpdate = -1;
             }
         };
         handlerItem.postDelayed(runnableItem, DEBOUNCE_INTERVAL);
@@ -116,11 +135,11 @@ public class CartFragment extends Fragment {
             @Override
             public void run() {
                 httpRequest.callAPI().updateCart(listCarts).enqueue(updateCart);
-                lastItemUpdate = currentItemUpdate = -1;
             }
         };
         handlerCart.postDelayed(runnableCart, DEBOUNCE_INTERVAL);
     }
+    private ProgressDialog progressDialog;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -131,8 +150,26 @@ public class CartFragment extends Fragment {
         RecyclerViewManagement();
         UpdateRecyclerViewWhenDataChanges();
         Order();
+        DeleteCartItem();
 
         return view;
+    }
+
+    private void DeleteCartItem() {
+
+        btn_deleteCartItem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                progressDialog = new ProgressDialog(getContext());
+                progressDialog.setMessage("Please wait for seconds!");
+                progressDialog.show();
+                ArrayList<String> cartIdArray = new ArrayList<>();
+                for (Cart cart : listCartDeletes) {
+                    cartIdArray.add(cart.get_id());
+                }
+                httpRequest.callAPI().deleteCartItems(cartIdArray).enqueue(deleteCartItems);
+            }
+        });
     }
 
     private void Order() {
@@ -140,12 +177,6 @@ public class CartFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), OrderActivity.class);
-//                ArrayList<Product> products = new ArrayList<>();
-//                for (Cart cart:listCarts) {
-//                    if (cart.isSelected()) {
-//                        products.add(findObjectById(mainActivity.listProducts,cart.getId_product()));
-//                    }
-//                }
                 ArrayList<Cart> items = new ArrayList<>();
                 for (Cart cart:listCarts) {
                     if (cart.isSelected()) {
@@ -155,9 +186,19 @@ public class CartFragment extends Fragment {
                 intent.putExtra("cartItems",items);
                 intent.putExtra("products",mainActivity.listProducts);
                 intent.putExtra("user",mainActivity.getUser());
-                startActivity(intent);
+                startActivityForResult(intent,REQUEST_CODE_ACTIVITY_BACK);
             }
         });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_ACTIVITY_BACK) {
+            if (resultCode == RESULT_OK) {
+                mainActivity.GetListCartById();
+            }
+        }
     }
 
     private void UpdateRecyclerViewWhenDataChanges() {
@@ -167,8 +208,23 @@ public class CartFragment extends Fragment {
                 listCarts = carts;
                 productCartAdapter.Update(carts);
                 CalculatorAmount(carts);
+                isItemSelected();
             }
         });
+    }
+
+    private void isItemSelected() {
+        listCartDeletes.clear();
+        for (Cart cart:listCarts) {
+            if (cart.isSelected()) {
+                listCartDeletes.add(cart);
+            }
+        }
+        if (listCartDeletes.size() > 0) {
+            btn_deleteCartItem.setVisibility(View.VISIBLE);
+        } else {
+            btn_deleteCartItem.setVisibility(View.GONE);
+        }
     }
 
     private void CalculatorAmount(ArrayList<Cart> carts) {
@@ -180,13 +236,29 @@ public class CartFragment extends Fragment {
         }
         tv_amount.setText(formatPrice(amount,"₫"));
     }
+    Callback<Response<ArrayList<Cart>>> deleteCartItems = new Callback<Response<ArrayList<Cart>>>() {
+        @Override
+        public void onResponse(Call<Response<ArrayList<Cart>>> call, retrofit2.Response<Response<ArrayList<Cart>>> response) {
+            if (response != null && response.isSuccessful()) {
+                if (response.body().getStatus() == 200) {
+                    mainActivity.GetListCartById();
+                    progressDialog.dismiss();
+                }
+            }
+        }
 
+        @Override
+        public void onFailure(Call<Response<ArrayList<Cart>>> call, Throwable t) {
+            progressDialog.dismiss();
+        }
+    };
     Callback<Response<Cart>> updateCartItem = new Callback<Response<Cart>>() {
         @Override
         public void onResponse(Call<Response<Cart>> call, retrofit2.Response<Response<Cart>> response) {
             if (response != null && response.isSuccessful()) {
                 if (response.body().getStatus() == 200) {
                     mainActivity.GetListCartById();
+                    lastItemUpdate = currentItemUpdate = -1;
                 }
             }
         }
@@ -202,6 +274,7 @@ public class CartFragment extends Fragment {
             if (response != null && response.isSuccessful()) {
                 if (response.body().getStatus() == 200) {
                     mainActivity.GetListCartById();
+                    lastItemUpdate = currentItemUpdate = -1;
                 }
             }
         }
@@ -232,6 +305,7 @@ public class CartFragment extends Fragment {
     }
     private void initUI(View view) {
         btn_order = view.findViewById(R.id.btn_order);
+        btn_deleteCartItem = view.findViewById(R.id.btn_deleteCartItem);
         tv_amount = view.findViewById(R.id.tv_amount);
         mainActivity = (MainActivity) getActivity();
         rcv_cart = view.findViewById(R.id.rcv_cart);

@@ -32,50 +32,68 @@
                 android:id="@+id/rcv_cart"/>
         </LinearLayout>
         <LinearLayout
-            android:gravity="center|bottom"
             android:layout_alignParentStart="true"
             android:layout_alignParentBottom="true"
-            android:layout_width="200dp"
+            android:layout_width="match_parent"
             android:layout_height="80dp"
-            android:background="@drawable/cus_bgr_white_circle_shadow"
-            android:orientation="vertical">
+            android:orientation="horizontal">
             <LinearLayout
-                android:layout_marginTop="12dp"
-                android:layout_width="match_parent"
-                android:layout_height="24dp"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_gravity="left"
-                    android:layout_width="wrap_content"
+                android:background="@drawable/cus_bgr_white_circle_shadow"
+                android:gravity="left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_marginTop="12dp"
+                    android:layout_width="match_parent"
                     android:layout_height="24dp"
-                    android:gravity="center_vertical"
-                    android:text="Amount: "
-                    android:layout_marginLeft="12dp"
-                    android:textSize="16sp"
-                    android:textColor="@color/black_220"
-                    android:fontFamily="@font/museomodernomedium"/>
-                <TextView
-                    android:id="@+id/tv_amount"
-                    android:layout_gravity="left"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="24dp"
-                    android:gravity="center_vertical|right"
-                    android:text="100,000đ"
-                    android:layout_marginRight="12dp"
-                    android:textSize="16sp"
-                    android:textColor="@color/green_200"
-                    android:fontFamily="@font/museomodernoitalic"/>
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_gravity="left"
+                        android:layout_width="wrap_content"
+                        android:layout_height="24dp"
+                        android:gravity="center_vertical"
+                        android:text="Amount: "
+                        android:layout_marginLeft="12dp"
+                        android:textSize="16sp"
+                        android:textColor="@color/black_220"
+                        android:fontFamily="@font/museomodernomedium"/>
+                    <TextView
+                        android:id="@+id/tv_amount"
+                        android:layout_gravity="left"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="24dp"
+                        android:gravity="center_vertical|right"
+                        android:text="100,000đ"
+                        android:layout_marginRight="12dp"
+                        android:textSize="16sp"
+                        android:textColor="@color/green_200"
+                        android:fontFamily="@font/museomodernoitalic"/>
+                </LinearLayout>
+                <Button
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/cus_bgr_green_circle_bottom"
+                    android:layout_width="match_parent"
+                    android:layout_height="32dp"
+                    android:text="Order"
+                    android:fontFamily="@font/museomodernomedium"
+                    android:textColor="@color/white"
+                    android:id="@+id/btn_order"/>
             </LinearLayout>
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"/>
             <Button
-                android:layout_marginTop="12dp"
-                android:background="@drawable/cus_bgr_green_circle_bottom"
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:text="Order"
-                android:fontFamily="@font/museomodernomedium"
+                android:visibility="gone"
+                android:id="@+id/btn_deleteCartItem"
+                android:layout_gravity="center_vertical"
                 android:textColor="@color/white"
-                android:id="@+id/btn_order"/>
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete"
+                android:background="@color/red_959"/>
         </LinearLayout>
     </RelativeLayout>
 </FrameLayout>

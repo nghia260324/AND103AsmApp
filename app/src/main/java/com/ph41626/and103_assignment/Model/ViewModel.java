@@ -12,6 +12,7 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
     private MutableLiveData<ArrayList<Category>> listCategories = new MutableLiveData<>();
     private MutableLiveData<ArrayList<Distributor>> listDistributors = new MutableLiveData<>();
     private MutableLiveData<ArrayList<Cart>> listCarts = new MutableLiveData<>();
+    private MutableLiveData<ArrayList<Order>> listOrders = new MutableLiveData<>();
     private MutableLiveData<User> saveUser = new MutableLiveData<>();
 
     private MutableLiveData<ArrayList<Product>> listProductsSearch = new MutableLiveData<>();
@@ -29,6 +30,9 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
     public void changeDataDistributors(ArrayList<Distributor> distributors) {
         listDistributors.setValue(distributors);
     }
+    public void changeDataOrders(ArrayList<Order> orders) {
+        listOrders.setValue(orders);
+    }
     public void changeUser(User getUser){saveUser.setValue(getUser);}
     public void changeDataSearch(ArrayList<Product> products) {listProductsSearch.setValue(products);}
     public LiveData<ArrayList<Product>> getChangeDataProducts() {
@@ -37,6 +41,7 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
     public LiveData<ArrayList<Category>> getChangeDataCategories() {return listCategories;}
     public LiveData<ArrayList<Distributor>> getChangeDataDistributors() {return listDistributors;}
     public LiveData<ArrayList<Cart>> getChangeDataCarts() {return listCarts;}
+    public LiveData<ArrayList<Order>> getChangeDataOrders() {return listOrders;}
     public LiveData<User> getChangeUser() {return saveUser;}
     public LiveData<ArrayList<Product>> getChangeDataSearch() {return listProductsSearch;}
 }

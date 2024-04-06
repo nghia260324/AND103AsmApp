@@ -6,9 +6,12 @@ import static com.ph41626.and103_assignment.Services.Services.formatPrice;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -18,8 +21,11 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
@@ -31,13 +37,19 @@ import com.ph41626.and103_assignment.Adapter.ViewPagerMainBottomNavigationAdapte
 import com.ph41626.and103_assignment.Model.Cart;
 import com.ph41626.and103_assignment.Model.Category;
 import com.ph41626.and103_assignment.Model.Distributor;
+import com.ph41626.and103_assignment.Model.GHNOrderRequest;
+import com.ph41626.and103_assignment.Model.GHNRequest;
+import com.ph41626.and103_assignment.Model.Order;
 import com.ph41626.and103_assignment.Model.Product;
 import com.ph41626.and103_assignment.Model.Response;
 import com.ph41626.and103_assignment.Model.User;
 import com.ph41626.and103_assignment.Model.ViewModel;
 import com.ph41626.and103_assignment.R;
+import com.ph41626.and103_assignment.Services.GHNServices;
 import com.ph41626.and103_assignment.Services.HttpRequest;
+import com.ph41626.and103_assignment.Services.TokenManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import kotlin.Unit;
@@ -46,6 +58,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 
 public class MainActivity extends AppCompatActivity {
+    public static final int REQUEST_CODE_ACTIVITY_BACK = 1;
     private static final int FRAGMENT_HOME = 0;
     private static final int FRAGMENT_SEARCH = 1;
     private static final int FRAGMENT_CART = 2;
@@ -57,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
     private MeowBottomNavigation bottomNavigation;
     private ViewPagerMainBottomNavigationAdapter navigationAdapter;
     private HttpRequest httpRequest;
+    private ProgressDialog progressDialog;
     private User user = new User();
 
     public User getUser() {
@@ -70,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
     public ArrayList<Product> listProducts = new ArrayList<>();
     public ArrayList<Category> listCategories = new ArrayList<>();
     public ArrayList<Distributor> listDistributors = new ArrayList<>();
+    public ArrayList<Order> listOrders = new ArrayList<>();
     public ArrayList<Cart> listCarts = new ArrayList<>();
     private boolean isAdmin = false;
     private String messenger = "";
@@ -84,9 +99,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        GetDataFromAPI();
+//        GetDataFromAPI();
     }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,12 +115,29 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigation.show(1,true);
         mCurrentFragment = FRAGMENT_SEARCH;
     }
+    public void GoToFragmentOrder() {
+        viewPager2.setCurrentItem(2);
+        bottomNavigation.show(2,true);
+        mCurrentFragment = FRAGMENT_CART;
+    }
+    public void GoToMyPurchases() {
+        Intent intentMyPurchases = new Intent(this, MyPurchasesActivity.class);
+        intentMyPurchases.putExtra("user",user);
+        intentMyPurchases.putExtra("products",listProducts);
+        intentMyPurchases.putExtra("orders",listOrders);
+        startActivity(intentMyPurchases);
+    }
     public void InventoryManagement() {
         Intent intentInventory = new Intent(this, InventoryActivity.class);
         intentInventory.putExtra("products",listProducts);
         intentInventory.putExtra("categories",listCategories);
         intentInventory.putExtra("distributors",listDistributors);
         startActivity(intentInventory);
+    }
+    public void UserInformationManagement() {
+        Intent intentUserInformation = new Intent(this, UserInformationActivity.class);
+        intentUserInformation.putExtra("user",user);
+        startActivityForResult(intentUserInformation,REQUEST_CODE_ACTIVITY_BACK);
     }
     public void LogOut() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -115,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         FirebaseAuth.getInstance().signOut();
+                        TokenManager.getInstance(MainActivity.this).clearToken();
                         Intent intentInventory = new Intent(MainActivity.this, SignInActivity.class);
                         startActivity(intentInventory);
                     }
@@ -128,9 +160,9 @@ public class MainActivity extends AppCompatActivity {
         builder.create().show();
     }
     private void GetDataFromAPI() {
-        httpRequest.callAPI().getListProducts().enqueue(getProductsFromAPI);
-        httpRequest.callAPI().getListCategories().enqueue(getCategoriesFromAPI);
-        httpRequest.callAPI().getListDistributors().enqueue(getDistributorsFromAPI);
+        httpRequest.callAPI().getListProducts(TokenManager.getInstance(this).getToken()).enqueue(getProductsFromAPI);
+        httpRequest.callAPI().getListCategories(TokenManager.getInstance(this).getToken()).enqueue(getCategoriesFromAPI);
+        httpRequest.callAPI().getListDistributors(TokenManager.getInstance(this).getToken()).enqueue(getDistributorsFromAPI);
     }
     private void GetUser() {
         String email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
@@ -146,7 +178,9 @@ public class MainActivity extends AppCompatActivity {
             if (quantity.length > 0) {
                 finalQuantity = quantity[0];
             } else { finalQuantity = 1;}
-            httpRequest.callAPI().addCart(new Cart("",user.get_id(),product.getId(),finalQuantity)).enqueue(addCart);
+            httpRequest.callAPI().addCart(
+                    TokenManager.getInstance(this).getToken(),
+                    new Cart("",user.get_id(),product.getId(),finalQuantity)).enqueue(addCart);
         } else {
             messenger = "Product has been added to the cart!";
             DialogShowMessenger();
@@ -171,7 +205,6 @@ public class MainActivity extends AppCompatActivity {
         layoutParams.gravity = Gravity.CENTER;
         dialogProductDetail.getWindow().setAttributes(layoutParams);
 
-        ImageButton btn_back = dialogView.findViewById(R.id.btn_back);
         ImageView img_thumbnail = dialogView.findViewById(R.id.img_thumbnail);
         TextView
                 tv_name = dialogView.findViewById(R.id.tv_name),
@@ -180,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
                 tv_quantity = dialogView.findViewById(R.id.tv_quantity);
         Button btn_addToCart = dialogView.findViewById(R.id.btn_addToCart);
         ImageButton
+                btn_back = dialogView.findViewById(R.id.btn_back),
                 btn_Increase = dialogView.findViewById(R.id.btn_Increase),
                 btn_Decrease = dialogView.findViewById(R.id.btn_Decrease);
 
@@ -229,7 +263,12 @@ public class MainActivity extends AppCompatActivity {
         OpenDialogProductDetail(product);
     }
     public void GetListCartById() {
-        httpRequest.callAPI().getListCartsById(user.get_id()).enqueue(getCartsById);
+        httpRequest.callAPI().getListCartsById(
+                TokenManager.getInstance(this).getToken(),
+                user.get_id()).enqueue(getCartsById);
+    }
+    public void GetOrders() {
+        httpRequest.callAPI().getListOrders(user.get_id()).enqueue(getOrders);
     }
     Callback<Response<User>> getUser = new Callback<Response<User>>() {
         @Override
@@ -237,8 +276,16 @@ public class MainActivity extends AppCompatActivity {
             if (response.isSuccessful()) {
                 if (response.body().getStatus() == 200) {
                     user = response.body().getData();
+                    TokenManager tokenManager = TokenManager.getInstance(MainActivity.this);
+                    tokenManager.saveToken(response.body().getToken());
                     viewModel.changeUser(user);
+                    GetDataFromAPI();
                     GetListCartById();
+                    GetOrders();
+                    if (progressDialog != null) {
+                        progressDialog.dismiss();
+                        progressDialog = null;
+                    }
                 }
             }
         }
@@ -256,12 +303,18 @@ public class MainActivity extends AppCompatActivity {
                     listProducts = response.body().getData();
                     viewModel.changeDataProducts(listProducts);
                 }
+            } else {
+                try {
+                    Log.e("Check Err A",response.errorBody().string());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
 
         @Override
         public void onFailure(Call<Response<ArrayList<Product>>> call, Throwable t) {
-            Log.e("Err",t.getMessage());
+            Log.e("Err Check",t.getMessage());
         }
     };
     Callback<Response<ArrayList<Category>>> getCategoriesFromAPI = new Callback<Response<ArrayList<Category>>>() {
@@ -330,6 +383,33 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+    Callback<Response<ArrayList<Order>>> getOrders = new Callback<Response<ArrayList<Order>>>() {
+        @Override
+        public void onResponse(Call<Response<ArrayList<Order>>> call, retrofit2.Response<Response<ArrayList<Order>>> response) {
+            if (response != null && response.isSuccessful()) {
+                if (response.body().getStatus() == 200) {
+                    listOrders = response.body().getData();
+                    viewModel.changeDataOrders(listOrders);
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<Response<ArrayList<Order>>> call, Throwable t) {
+
+        }
+    };
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_ACTIVITY_BACK && resultCode == RESULT_OK) {
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage("Please wait for seconds!");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+            GetUser();
+        }
+    }
     private void DialogShowMessenger () {
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
         builder.setMessage(messenger);

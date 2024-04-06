@@ -40,6 +40,7 @@ import com.ph41626.and103_assignment.Model.Response;
 import com.ph41626.and103_assignment.Model.ViewModel;
 import com.ph41626.and103_assignment.R;
 import com.ph41626.and103_assignment.Services.HttpRequest;
+import com.ph41626.and103_assignment.Services.TokenManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -144,9 +145,9 @@ public class InventoryActivity extends AppCompatActivity {
         }
     };
     public void GetDataFromAPI() {
-        httpRequest.callAPI().getListProducts().enqueue(getProductsFromAPI);
-        httpRequest.callAPI().getListCategories().enqueue(getCategoriesFromAPI);
-        httpRequest.callAPI().getListDistributors().enqueue(getDistributorsFromAPI);
+        httpRequest.callAPI().getListProducts(TokenManager.getInstance(this).getToken()).enqueue(getProductsFromAPI);
+        httpRequest.callAPI().getListCategories(TokenManager.getInstance(this).getToken()).enqueue(getCategoriesFromAPI);
+        httpRequest.callAPI().getListDistributors(TokenManager.getInstance(this).getToken()).enqueue(getDistributorsFromAPI);
     }
     private void GetDataFromMainActivity() {
         Intent intent = getIntent();

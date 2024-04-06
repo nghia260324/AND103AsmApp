@@ -1,6 +1,8 @@
 package com.ph41626.and103_assignment.Model;
 
-public class GHNItem {
+import java.io.Serializable;
+
+public class GHNItem implements Serializable {
     private String name,code;
     private int quantity,price,weight;
 

@@ -348,7 +348,7 @@ public class GHNOrderRequest {
         this.to_district_id = to_district_id;
         this.items = ghnItems;
         from_name = "Nghiantph41626";
-        from_phone = "Your Phone";
+        from_phone = "Your PhoneNumber";
         from_address = "Xã Tả Thanh Oai, Thanh Trì, Hà Nội";
         from_ward_name = "Xả Tả Thanh Oai";
         from_district_name = "Huyện Thanh Trì";
@@ -356,7 +356,7 @@ public class GHNOrderRequest {
         payment_type_id = 2;
         note = "Vui lòng gọi khách trước khi giao hàng!";
         required_note = "KHONGCHOXEMHANG";
-        return_phone = "Your Phone";
+        return_phone = "Your PhoneNumber";
         return_address = from_address;
         content = "";
         cod_amount = 0;

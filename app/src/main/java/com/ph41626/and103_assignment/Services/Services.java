@@ -3,6 +3,13 @@ package com.ph41626.and103_assignment.Services;
 import static com.ph41626.and103_assignment.Services.ApiServices.BASE_URL;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.widget.EditText;
+import android.widget.ImageView;
+
+import androidx.palette.graphics.Palette;
 
 import com.ph41626.and103_assignment.Model.Cart;
 import com.ph41626.and103_assignment.Model.Category;
@@ -11,6 +18,7 @@ import com.ph41626.and103_assignment.Model.District;
 import com.ph41626.and103_assignment.Model.Product;
 import com.ph41626.and103_assignment.Model.Province;
 import com.ph41626.and103_assignment.Model.Ward;
+import com.ph41626.and103_assignment.R;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -95,6 +103,54 @@ public class Services {
             }
         }
         return -1;
+    }
+    public static final boolean ValidateInputFields(
+            String name, EditText edt_name,
+            String quantity,EditText edt_quantity,
+            String price, EditText edt_price,
+            String description,EditText edt_description) {
+        boolean isValid = true;
+
+        if (name.isEmpty()) {
+            isValid = false;
+            edt_name.setError("Name cannot be empty!");
+        }
+        if (quantity.isEmpty()) {
+            isValid = false;
+            edt_quantity.setError("Quantity cannot be empty!");
+        } else {
+            try {
+                int quantityValue = Integer.parseInt(quantity);
+                if (quantityValue <= 0) {
+                    isValid = false;
+                    edt_quantity.setError("Quantity must be a positive integer!");
+                }
+            } catch (NumberFormatException e) {
+                isValid = false;
+                edt_quantity.setError("Quantity must be a valid integer!");
+            }
+        }
+        if (price.isEmpty()) {
+            isValid = false;
+            edt_price.setError("Price cannot be empty!");
+        } else {
+            try {
+                int priceValue = Integer.parseInt(price);
+                if (priceValue <= 0) {
+                    isValid = false;
+                    edt_price.setError("Price must be a positive number!");
+                }
+            } catch (NumberFormatException e) {
+                isValid = false;
+                edt_price.setError("Price must be a valid number!");
+            }
+        }
+        if (description.isEmpty()) {
+            isValid = false;
+            edt_description.setError("Description cannot be empty!");
+        }
+
+        return isValid;
     }
     public static final void WriteObjectToFile(Context context, String path, Object object){
         try {

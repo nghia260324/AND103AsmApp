@@ -1,6 +1,7 @@
 package com.ph41626.and103_assignment.Activity;
 
 import static com.ph41626.and103_assignment.Services.Services.PICK_IMAGE_REQUEST;
+import static com.ph41626.and103_assignment.Services.Services.ValidateInputFields;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,6 +36,7 @@ import com.ph41626.and103_assignment.Model.User;
 import com.ph41626.and103_assignment.Model.ViewModel;
 import com.ph41626.and103_assignment.R;
 import com.ph41626.and103_assignment.Services.HttpRequest;
+import com.ph41626.and103_assignment.Services.TokenManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -121,7 +123,15 @@ public class AddProductActivity extends AppCompatActivity {
                 int status = rdo_available.isChecked() ? 0 : 1;
                 String description = edt_description.getText().toString().trim();
 
-                if (!ValidateAddProductForm(name,quantity,price,description)) {
+                if (!ValidateInputFields(
+                        name,edt_name,
+                        quantity,edt_quantity,
+                        price,edt_price,
+                        description,edt_description)) {
+                    return;
+                }
+                if (file == null) {
+                    Toast.makeText(AddProductActivity.this, "Thumbnail is required!", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -137,6 +147,7 @@ public class AddProductActivity extends AppCompatActivity {
                 RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"),file);
                 multipartBody = MultipartBody.Part.createFormData("thumbnail",file.getName(),requestFile);
                 httpRequest.callAPI().addProduct(
+                        TokenManager.getInstance(AddProductActivity.this).getToken(),
                         _name,
                         _quantity,
                         _price,
@@ -217,32 +228,6 @@ public class AddProductActivity extends AppCompatActivity {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-    private boolean ValidateAddProductForm(String name, String quantity, String price, String description) {
-        boolean isValid = true;
-
-        if (name.isEmpty()) {
-            isValid = false;
-            edt_name.setError("Name is required!");
-        }
-        if (quantity.isEmpty() || !quantity.matches("^\\d+$")) {
-            isValid = false;
-            edt_quantity.setError("Quantity is required!");
-        }
-        if (price.isEmpty() || !price.matches("^\\d+$")) {
-            isValid = false;
-            edt_price.setError("Price is required!");
-        }
-        if (description.isEmpty()) {
-            isValid = false;
-            edt_description.setError("Description is required!");
-        }
-        if (file == null) {
-            isValid = false;
-            Toast.makeText(this, "Thumbnail is required!", Toast.LENGTH_SHORT).show();
-        }
-
-        return isValid;
     }
     private void initUI() {
         rdo_available = findViewById(R.id.rdo_available);

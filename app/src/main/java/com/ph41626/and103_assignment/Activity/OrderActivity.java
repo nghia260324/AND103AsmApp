@@ -1,5 +1,6 @@
 package com.ph41626.and103_assignment.Activity;
 
+import static com.ph41626.and103_assignment.Activity.MainActivity.REQUEST_CODE_ACTIVITY_BACK;
 import static com.ph41626.and103_assignment.Services.Services.ReadObjectToFile;
 import static com.ph41626.and103_assignment.Services.Services.convertLocalhostToIpAddress;
 import static com.ph41626.and103_assignment.Services.Services.filePathAddressInfo;
@@ -40,6 +41,7 @@ import com.ph41626.and103_assignment.Model.GHNOrderRequest;
 import com.ph41626.and103_assignment.Model.GHNOrderRespone;
 import com.ph41626.and103_assignment.Model.GHNRequest;
 import com.ph41626.and103_assignment.Model.Order;
+import com.ph41626.and103_assignment.Model.OrderDetail;
 import com.ph41626.and103_assignment.Model.Product;
 import com.ph41626.and103_assignment.Model.Province;
 import com.ph41626.and103_assignment.Model.ResponeGHN;
@@ -50,15 +52,16 @@ import com.ph41626.and103_assignment.Model.Ward;
 import com.ph41626.and103_assignment.R;
 import com.ph41626.and103_assignment.Services.HttpRequest;
 import com.ph41626.and103_assignment.Services.Services;
+import com.ph41626.and103_assignment.Services.TokenManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 
 public class OrderActivity extends AppCompatActivity {
-    private static final int REQUEST_CODE_ACTIVITY_BACK = 1;
     private GHNRequest ghnRequest;
     private TextView tv_address,tv_totalPayment;
     private Button btn_order;
@@ -69,7 +72,9 @@ public class OrderActivity extends AppCompatActivity {
     private ArrayList<Cart> listCarts = new ArrayList<>();
     private ArrayList<GHNItem> ghnItems = new ArrayList<>();
     private ProgressDialog progressDialog;
+    private GHNOrderRequest ghnOrderRequest;
     private AddressInfo addressInfo = new AddressInfo();
+    private OrderDetail orderDetail = new OrderDetail();
     private int totalPayment;
     private String messenger = "";
     public int getTotalPayment() {
@@ -81,6 +86,12 @@ public class OrderActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        setResult(RESULT_CANCELED);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order);
@@ -89,7 +100,7 @@ public class OrderActivity extends AppCompatActivity {
         GetDataFromCart();
         SelectedAddress();
         addressInfo = (AddressInfo) ReadObjectToFile(this,user.get_id() + filePathAddressInfo);
-        if (addressInfo != null && addressInfo.getId_user().equals(user.get_id())) {
+        if (addressInfo != null) {
             FillInfo();
         } else {
             addressInfo = new AddressInfo();
@@ -108,7 +119,7 @@ public class OrderActivity extends AppCompatActivity {
                 progressDialog.show();
                 progressDialog.setCancelable(false);
 
-                GHNOrderRequest ghnOrderRequest = new GHNOrderRequest(
+                ghnOrderRequest = new GHNOrderRequest(
                         user.getName(),
                         addressInfo.getPhone(),
                         addressInfo.getAddress(),
@@ -124,7 +135,7 @@ public class OrderActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_ACTIVITY_BACK) {
             addressInfo = (AddressInfo) ReadObjectToFile(this,user.get_id() + filePathAddressInfo);
-            if (addressInfo != null && addressInfo.getId_user().equals(user.get_id())) {
+            if (addressInfo != null) {
                 FillInfo();
             } else {
                 addressInfo = new AddressInfo();
@@ -211,16 +222,13 @@ public class OrderActivity extends AppCompatActivity {
                     order.setOrder_code(response.body().getData().getOrder_code());
                     order.setId_user(user.get_id());
 
-                    httpRequest.callAPI().order(order).enqueue(addOrderDB);
+                    httpRequest.callAPI().order(
+                            TokenManager.getInstance(OrderActivity.this).getToken(),
+                            order).enqueue(addOrderDB);
                 }
             } else {
-                try {
-                    Log.e("Check Info",response.errorBody().string());
-                    messenger = "Invalid personal information detected. Please update your personal information to continue using our services accurately and securely!";
-                    DialogShowMessenger();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                messenger = "Invalid personal information detected. Please update your personal information to continue using our services accurately and securely!";
+                DialogShowMessenger();
                 progressDialog.dismiss();
             }
         }
@@ -235,15 +243,45 @@ public class OrderActivity extends AppCompatActivity {
         public void onResponse(Call<Response<Order>> call, retrofit2.Response<Response<Order>> response) {
             if (response != null && response.isSuccessful()) {
                 if (response.body().getStatus() == 200) {
-                    Toast.makeText(OrderActivity.this, "Order Success!", Toast.LENGTH_SHORT).show();
-                    progressDialog.dismiss();
-                    finish();
+                    Order order = response.body().getData();
+
+                    orderDetail = new OrderDetail();
+                    orderDetail.setId_order(order.get_id());
+                    orderDetail.setItems(ghnOrderRequest.getItems());
+                    orderDetail.setTo_name(ghnOrderRequest.getTo_name());
+                    orderDetail.setTo_phone(ghnOrderRequest.getTo_phone());
+                    orderDetail.setTo_address(ghnOrderRequest.getTo_address());
+                    orderDetail.setTo_ward_code(ghnOrderRequest.getTo_ward_code());
+                    orderDetail.setTo_district_id(ghnOrderRequest.getTo_district_id());
+                    orderDetail.setCod_amount(ghnOrderRequest.getCod_amount());
+
+                    httpRequest.callAPI().addOrderDetail(
+                            TokenManager.getInstance(OrderActivity.this).getToken(),
+                            orderDetail).enqueue(addOrderDetail);
                 }
             }
         }
 
         @Override
         public void onFailure(Call<Response<Order>> call, Throwable t) {
+
+        }
+    };
+    Callback<Response<OrderDetail>> addOrderDetail = new Callback<Response<OrderDetail>>() {
+        @Override
+        public void onResponse(Call<Response<OrderDetail>> call, retrofit2.Response<Response<OrderDetail>> response) {
+            if (response != null && response.isSuccessful()) {
+                if (response.body().getStatus() == 200) {
+                    progressDialog.dismiss();
+                    Toast.makeText(OrderActivity.this, "Order Success!", Toast.LENGTH_SHORT).show();
+                    setResult(RESULT_OK);
+                    finish();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<Response<OrderDetail>> call, Throwable t) {
 
         }
     };

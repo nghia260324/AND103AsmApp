@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.ph41626.and103_assignment.Activity.MainActivity;
@@ -69,6 +70,7 @@ public class HomeFragment extends Fragment {
     }
 
     private RecyclerView rcv_productHome;
+    private Button btn_gotoOrder;
     private ViewModel viewModel;
     private EditText edt_searchHome;
     private RecyclerViewProductHomeAdapter productHomeAdapter;
@@ -83,9 +85,18 @@ public class HomeFragment extends Fragment {
         FillRecyclerViewProductsHome();
         UpdateRecyclerViewWhenDataChanges();
         GoToFragmentSearch();
+        GoToFragmentOrder();
         return view;
     }
 
+    private void GoToFragmentOrder() {
+        btn_gotoOrder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainActivity.GoToFragmentOrder();
+            }
+        });
+    }
     private void GoToFragmentSearch() {
         edt_searchHome.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -96,7 +107,6 @@ public class HomeFragment extends Fragment {
             }
         });
     }
-
     private void UpdateRecyclerViewWhenDataChanges() {
         viewModel.getChangeDataProducts().observe(getViewLifecycleOwner(), new Observer<ArrayList<Product>>() {
             @Override
@@ -116,5 +126,7 @@ public class HomeFragment extends Fragment {
         rcv_productHome = view.findViewById(R.id.rcv_productHome);
         productHomeAdapter = new RecyclerViewProductHomeAdapter(getContext(), listProducts,mainActivity);
         edt_searchHome = view.findViewById(R.id.edt_searchHome);
+
+        btn_gotoOrder = view.findViewById(R.id.btn_gotoOrder);
     }
 }

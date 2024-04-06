@@ -2,6 +2,7 @@ package com.ph41626.and103_assignment.Services;
 
 import com.ph41626.and103_assignment.Model.District;
 import com.ph41626.and103_assignment.Model.DistrictRequest;
+import com.ph41626.and103_assignment.Model.GHNOrderDetail;
 import com.ph41626.and103_assignment.Model.GHNOrderRequest;
 import com.ph41626.and103_assignment.Model.GHNOrderRespone;
 import com.ph41626.and103_assignment.Model.Province;
@@ -26,4 +27,6 @@ public interface GHNServices {
     Call<ResponeGHN<ArrayList<Ward>>> getListWard(@Query("district_id") int district_id);
     @POST("shiip/public-api/v2/shipping-order/create")
     Call<ResponeGHN<GHNOrderRespone>> GHNOrder(@Body GHNOrderRequest ghnOrderRequest);
+    @GET("shiip/public-api/v2/shipping-order/detail")
+    Call<ResponeGHN<GHNOrderDetail>> GHNOrderDetail (@Query("order_code") String order_code);
 }

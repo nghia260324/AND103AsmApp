@@ -34,6 +34,7 @@ import com.ph41626.and103_assignment.Model.ViewModel;
 import com.ph41626.and103_assignment.R;
 import com.ph41626.and103_assignment.Services.HttpRequest;
 import com.ph41626.and103_assignment.Services.Item_Category_Handle;
+import com.ph41626.and103_assignment.Services.TokenManager;
 
 import java.util.ArrayList;
 
@@ -185,11 +186,15 @@ public class CategoryFragment extends Fragment {
                 }
                 if (typeHandle) {
                     messenger = "Add Category Successfully!";
-                    httpRequest.callAPI().addCategory(new Category("",name)).enqueue(addCategory);
+                    httpRequest.callAPI().addCategory(
+                            TokenManager.getInstance(getContext()).getToken(),
+                            new Category("",name)).enqueue(addCategory);
                 } else {
                     messenger = "Update Category Successfully!";
                     categoryUpdate.setName(name);
-                    httpRequest.callAPI().updateCategory(categoryUpdate.getId(),categoryUpdate).enqueue(addCategory);
+                    httpRequest.callAPI().updateCategory(
+                            TokenManager.getInstance(getContext()).getToken(),
+                            categoryUpdate.getId(),categoryUpdate).enqueue(addCategory);
                 }
             }
         });
@@ -219,7 +224,9 @@ public class CategoryFragment extends Fragment {
         builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                httpRequest.callAPI().deleteCategory(id).enqueue(addCategory);
+                httpRequest.callAPI().deleteCategory(
+                        TokenManager.getInstance(getContext()).getToken(),
+                        id).enqueue(addCategory);
                 dialog.dismiss();
             }
         }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

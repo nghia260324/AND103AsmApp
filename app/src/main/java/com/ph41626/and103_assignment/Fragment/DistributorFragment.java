@@ -33,6 +33,7 @@ import com.ph41626.and103_assignment.Model.ViewModel;
 import com.ph41626.and103_assignment.R;
 import com.ph41626.and103_assignment.Services.HttpRequest;
 import com.ph41626.and103_assignment.Services.Item_Distributor_Handle;
+import com.ph41626.and103_assignment.Services.TokenManager;
 
 import java.util.ArrayList;
 
@@ -178,11 +179,16 @@ public class DistributorFragment extends Fragment {
                 }
                 if (typeHandle) {
                     messenger = "Add Distributor Successfully!";
-                    httpRequest.callAPI().addDistributor(new Distributor("",name,"","")).enqueue(addDistributor);
+                    httpRequest.callAPI().addDistributor(
+                            TokenManager.getInstance(getContext()).getToken(),
+                            new Distributor("",name,"","")).enqueue(addDistributor);
                 } else {
                     messenger = "Update Distributor Successfully!";
                     distributorUpdate.setName(name);
-                    httpRequest.callAPI().updateDistributor(distributorUpdate.getId(),distributorUpdate).enqueue(addDistributor);
+                    httpRequest.callAPI().updateDistributor(
+                            TokenManager.getInstance(getContext()).getToken(),
+                            distributorUpdate.getId(),
+                            distributorUpdate).enqueue(addDistributor);
                 }
             }
         });
@@ -239,7 +245,9 @@ public class DistributorFragment extends Fragment {
         builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                httpRequest.callAPI().deleteDistributor(id).enqueue(addDistributor);
+                httpRequest.callAPI().deleteDistributor(
+                        TokenManager.getInstance(getContext()).getToken(),
+                        id).enqueue(addDistributor);
                 dialog.dismiss();
             }
         }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

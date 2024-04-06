@@ -1,6 +1,8 @@
 package com.ph41626.and103_assignment.Model;
 
-public class Order {
+import java.io.Serializable;
+
+public class Order implements Serializable {
     private String _id;
     private String order_code;
     private String id_user;

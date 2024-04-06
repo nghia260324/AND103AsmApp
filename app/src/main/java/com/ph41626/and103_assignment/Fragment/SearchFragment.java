@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +18,11 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,8 +34,15 @@ import com.ph41626.and103_assignment.Model.Response;
 import com.ph41626.and103_assignment.Model.ViewModel;
 import com.ph41626.and103_assignment.R;
 import com.ph41626.and103_assignment.Services.HttpRequest;
+import com.ph41626.and103_assignment.Services.TokenManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -81,14 +93,17 @@ public class SearchFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
+    private Button btn_sort;
     private RecyclerView rcv_searchProduct;
     private RecyclerViewSearchProductAdapter searchProductAdapter;
-    private EditText edt_searchProduct;
+    private EditText edt_searchProduct,edt_price;
     private MainActivity mainActivity;
     private HttpRequest httpRequest;
     private ArrayList<Product> listProducts = new ArrayList<>();
     private ViewModel viewModel;
-    private InputMethodManager imm;
+    private Spinner spinner_sort;
+    private boolean isSort = true; // True = Ascending; False = Decrease
+//    private InputMethodManager imm;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -103,43 +118,126 @@ public class SearchFragment extends Fragment {
             getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
             //imm.showSoftInput(edt_searchProduct, InputMethodManager.SHOW_IMPLICIT);
         }
+        SpinnerSort();
         viewModel.getChangeDataSearch().observe(getViewLifecycleOwner(), new Observer<ArrayList<Product>>() {
             @Override
             public void onChanged(ArrayList<Product> products) {
+                listProducts = products;
                 searchProductAdapter.UpdateData(products);
+            }
+        });
+
+        btn_sort.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                if (isSort) {
+//                    Collections.sort(listProducts, Comparator.comparingInt(Product::getPrice));
+//                } else {
+//                    Collections.sort(listProducts, Comparator.comparingInt(Product::getPrice).reversed());
+//                }
+//                searchProductAdapter.UpdateData(listProducts);
+                boolean isValidate = true;
+                String key = edt_searchProduct.getText().toString().trim();
+                String price = edt_price.getText().toString().trim();
+                if (!price.isEmpty()) {
+                    try {
+                        int priceValue = Integer.parseInt(price);
+                        if (priceValue <= 0) {
+                            edt_price.setError("Price must be a positive number!");
+                            isValidate = false;
+                        }
+                    } catch (NumberFormatException e) {
+                        edt_price.setError("Price must be a valid number!");
+                        isValidate = false;
+                    }
+                }
+                if (isValidate) {
+                    Map<String,String> map = getMapFilter(key,price,isSort);
+                    httpRequest.callAPI().searchProduct(
+                            TokenManager.getInstance(getContext()).getToken(),
+                            map).enqueue(searchProduct);
+                }
             }
         });
 
         return view;
     }
 
+    private void SpinnerSort() {
+        ArrayAdapter<CharSequence> sortAdapter = ArrayAdapter.createFromResource(getActivity(),R.array.spinner_price, R.layout.item_spinner_sort);
+        spinner_sort.setAdapter(sortAdapter);
+        spinner_sort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                CharSequence value = (CharSequence) parent.getAdapter().getItem(position);
+                if (value.toString().equals("Ascending")) {
+                    isSort = true;
+                } else if (value.toString().equals("Decrease")) {
+                    isSort = false;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
     private void SearchProduct() {
         edt_searchProduct.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean isValidate = true;
                 String key = edt_searchProduct.getText().toString().trim();
-                httpRequest.callAPI().searchProduct(key).enqueue(searchProduct);
+                String price = edt_price.getText().toString().trim();
+                if (!price.isEmpty()) {
+                    try {
+                        int priceValue = Integer.parseInt(price);
+                        if (priceValue <= 0) {
+                            edt_price.setError("Price must be a positive number!");
+                            isValidate = false;
+                        }
+                    } catch (NumberFormatException e) {
+                        edt_price.setError("Price must be a valid number!");
+                        isValidate = false;
+                    }
+                }
+                if (isValidate) {
+                    Map<String,String> map = getMapFilter(key,price,isSort);
+                    httpRequest.callAPI().searchProduct(
+                            TokenManager.getInstance(getContext()).getToken(),
+                            map).enqueue(searchProduct);
+                }
                 return true;
             }
         });
+    }
+    private Map<String,String> getMapFilter (String name,String price,boolean isSort) {
+        Map<String,String> map = new HashMap<>();
+        map.put("name",name.equals("") ? "" : name);
+        map.put("price",price);
+        map.put("sort",String.valueOf(isSort ? 1:-1));
+        return map;
     }
     Callback<Response<ArrayList<Product>>> searchProduct = new Callback<Response<ArrayList<Product>>>() {
         @Override
         public void onResponse(Call<Response<ArrayList<Product>>> call, retrofit2.Response<Response<ArrayList<Product>>> response) {
             if (response != null && response.isSuccessful()) {
                 if (response.body().getStatus() == 200) {
+                    listProducts = response.body().getData();
+                    Toast.makeText(mainActivity, listProducts.size() + "", Toast.LENGTH_SHORT).show();
                     viewModel.changeDataSearch(response.body().getData());
                 } else {
                     viewModel.changeDataSearch(null);
-                    Toast.makeText(mainActivity, "Null Check", Toast.LENGTH_SHORT).show();
+
                 }
-            } else {
-                Toast.makeText(mainActivity, "Failed! Please try again.", Toast.LENGTH_SHORT).show();
             }
         }
 
         @Override
         public void onFailure(Call<Response<ArrayList<Product>>> call, Throwable t) {
+            Log.e("CHECK ERR SEARCH",t.getMessage());
 
         }
     };
@@ -150,11 +248,15 @@ public class SearchFragment extends Fragment {
     }
 
     private void initUI(View view) {
-        imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+//        imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         rcv_searchProduct = view.findViewById(R.id.rcv_searchProduct);
         mainActivity = (MainActivity) getActivity();
         edt_searchProduct = view.findViewById(R.id.edt_searchProduct);
+        edt_price = view.findViewById(R.id.edt_price);
         httpRequest = new HttpRequest();
         viewModel = new ViewModelProvider(requireActivity()).get(ViewModel.class);
+
+        btn_sort = view.findViewById(R.id.btn_sort);
+        spinner_sort = view.findViewById(R.id.spinner_sort);
     }
 }

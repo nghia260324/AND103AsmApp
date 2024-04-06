@@ -29,8 +29,6 @@ public class RecyclerViewSettingsAdapter extends RecyclerView.Adapter<RecyclerVi
     @NonNull
     @Override
     public RecyclerViewSettingsAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-//        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_setting,null,false);
-//        return new ViewHolder(view);
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_setting, parent, false);
         RecyclerView.LayoutParams layoutParams = new RecyclerView.LayoutParams(
                 RecyclerView.LayoutParams.MATCH_PARENT,
@@ -48,7 +46,6 @@ public class RecyclerViewSettingsAdapter extends RecyclerView.Adapter<RecyclerVi
             param.height = 0;
             holder.itemView.setLayoutParams(param);
             holder.itemView.setVisibility(View.GONE);
-
         }
         Setting setting = listSettings.get(position);
         holder.img_icon.setImageResource(setting.getIcon());
@@ -58,11 +55,13 @@ public class RecyclerViewSettingsAdapter extends RecyclerView.Adapter<RecyclerVi
             public void onClick(View v) {
                 switch (holder.getAdapterPosition()) {
                     case 0:
+                        mainActivity.UserInformationManagement();
                         break;
                     case 1:
                         mainActivity.InventoryManagement();
                         break;
                     case 2:
+                        mainActivity.GoToMyPurchases();
                         break;
                     case 3:
                         mainActivity.LogOut();

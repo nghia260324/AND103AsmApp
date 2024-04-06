@@ -24,6 +24,46 @@
             android:layout_height="56dp"
             android:background="@drawable/cus_bgr_white_shadow"
             android:hint="Search keywords..."/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_marginTop="12dp"
+            android:layout_marginHorizontal="24dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hintEnabled="false"
+            android:padding="6dp"
+            android:background="@drawable/cus_bgr_stroke_green_circle">
+            <EditText
+                android:id="@+id/edt_price"
+                android:background="@color/transparent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter price"
+                android:textColor="@color/black"
+                android:fontFamily="@font/mulishmedium"
+                android:textSize="16sp"
+                android:padding="12dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+        <RelativeLayout
+            android:layout_marginTop="12dp"
+            android:paddingHorizontal="24dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <Spinner
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/spinner_sort"/>
+            <Button
+                android:id="@+id/btn_sort"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:text="Sort"
+                android:textColor="@color/green_200"
+                android:background="@drawable/cus_bgr_white_circle_shadow"/>
+        </RelativeLayout>
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"

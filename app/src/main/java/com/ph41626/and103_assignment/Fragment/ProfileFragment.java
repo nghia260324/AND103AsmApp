@@ -98,7 +98,10 @@ public class ProfileFragment extends Fragment {
             public void onChanged(User user) {
                 tv_name.setText(user.getName());
                 tv_email.setText(user.getEmail());
-                Glide.with(getContext()).load(convertLocalhostToIpAddress(user.getAvatar())).error(R.drawable.img_home_1).placeholder(R.drawable.img_home_1).into(img_avatar);
+                Glide.with(getContext())
+                        .load(convertLocalhostToIpAddress(user.getAvatar()))
+                        .error(R.drawable.img_home_1).placeholder(R.drawable.img_home_1)
+                        .into(img_avatar);
             }
         });
     }
@@ -110,7 +113,7 @@ public class ProfileFragment extends Fragment {
     private void DataListSettings() {
         listSettings.add(new Setting(R.drawable.baseline_account_circle,"User Information"));
         listSettings.add(new Setting(R.drawable.baseline_manage_accounts,"Inventory Management"));
-        listSettings.add(new Setting(R.drawable.baseline_shopping_cart,"My Cart"));
+        listSettings.add(new Setting(R.drawable.baseline_shopping_cart,"My Purchases"));
         listSettings.add(new Setting(R.drawable.baseline_login,"Logout"));
     }
     private void initUI(View view) {

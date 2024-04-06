@@ -28,6 +28,7 @@ import com.ph41626.and103_assignment.Model.ViewModel;
 import com.ph41626.and103_assignment.R;
 import com.ph41626.and103_assignment.Services.HttpRequest;
 import com.ph41626.and103_assignment.Services.Item_Product_Handle;
+import com.ph41626.and103_assignment.Services.TokenManager;
 
 import java.util.ArrayList;
 
@@ -145,7 +146,7 @@ public class ProductFragment extends Fragment {
         builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                httpRequest.callAPI().deleteProduct(id).enqueue(deleteProduct);
+                httpRequest.callAPI().deleteProduct(TokenManager.getInstance(getContext()).getToken(),id).enqueue(deleteProduct);
                 dialog.dismiss();
             }
         }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
